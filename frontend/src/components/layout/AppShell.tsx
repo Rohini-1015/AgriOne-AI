@@ -180,6 +180,14 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col antialiased">
+      {/* Skip to Main Content Link for Keyboard Accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-emerald-700 focus:text-white focus:rounded-lg focus:shadow-lg focus:text-xs focus:font-bold focus:outline-hidden"
+      >
+        {language === 'ta' ? 'முதன்மை உள்ளடக்கத்திற்கு செல்க' : 'Skip to main content'}
+      </a>
+
       {/* Top Application Header */}
       <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 flex items-center justify-between shadow-2xs">
         {/* Left Section: Brand & Sidebar Collapse Toggle */}
@@ -684,7 +692,12 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         )}
 
         {/* Main Content Area */}
-        <main className="grow min-w-0 overflow-x-hidden pb-16 lg:pb-8">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          role="main"
+          className="grow min-w-0 overflow-x-hidden pb-16 lg:pb-8 outline-hidden"
+        >
           {children}
         </main>
       </div>
