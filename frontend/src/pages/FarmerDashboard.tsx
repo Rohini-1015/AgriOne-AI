@@ -162,10 +162,10 @@ export const FarmerDashboard: React.FC = () => {
             </div>
             <div className="my-2.5">
               <div className="text-2xl font-black text-slate-900 tracking-tight">
-                {weather ? `${weather.current.temp}°C` : '31°C'}
+                {weather?.current?.temp != null ? `${weather.current.temp}°C` : '31°C'}
               </div>
               <p className="text-xs text-slate-600 font-medium mt-0.5">
-                {weather ? `${weather.current.humidity}% humidity • Sunny` : '68% humidity • Clear Sky'}
+                {weather?.current?.humidity != null ? `${weather.current.humidity}% humidity • Sunny` : '68% humidity • Clear Sky'}
               </p>
             </div>
             <Link
