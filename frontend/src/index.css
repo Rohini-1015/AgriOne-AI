@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Enterprise AgriTech Panel & Card Styles */
+.agri-card {
+  @apply bg-white rounded-xl border border-slate-200/80 shadow-subtle hover:shadow-panel transition-all duration-200;
+}
+
+.agri-card-elevated {
+  @apply bg-white rounded-xl border border-slate-200 shadow-panel hover:shadow-panel-hover transition-all duration-200;
+}
+
+.agri-panel {
+  @apply bg-white rounded-xl border border-slate-200/90 shadow-subtle;
+}
+
+/* Gradients */
+.agri-gradient-hero {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 45%, #f8fafc 100%);
+}
+
+.agri-gradient-gold {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.agri-gradient-subtle {
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+/* Standardized Form & Button Tokens */
+.agri-input {
+  @apply w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all;
+}
+
+.agri-select {
+  @apply w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all;
+}
+
+.agri-btn-primary {
+  @apply inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-semibold text-xs sm:text-sm bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.agri-btn-secondary {
+  @apply inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-semibold text-xs sm:text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 active:scale-[0.99] transition-all;
+}
+
+.agri-btn-outline {
+  @apply inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-semibold text-xs sm:text-sm border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 active:scale-[0.99] transition-all;
+}
+
+/* Smooth custom scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
