@@ -267,31 +267,51 @@ export function handleMockFallback(config: AxiosRequestConfig): AxiosResponse<an
   }
 
   // 1. AUTHENTICATION & LOGIN
+  // 1. AUTHENTICATION & LOGIN
   if (url.startsWith('/auth/login') && method === 'post') {
     const { emailOrPhone, password } = body;
-    const allUsers = [...DEFAULT_USERS, ...getStored<any[]>('users', [])];
+    const query = (emailOrPhone || '').trim().toLowerCase();
+    const storedUsers = getStored<any[]>('users', []);
+    const allUsers = [...DEFAULT_USERS, ...storedUsers];
 
-    // Find user by email, mobile, or default to farmer if demo
-    let found = allUsers.find(
-      u => u.email.toLowerCase() === (emailOrPhone || '').toLowerCase() || u.mobileNumber === emailOrPhone
+    const demoPasswords: Record<string, string> = {
+      'farmer@agrione.com': 'Farmer@123',
+      '9876543210': 'Farmer@123',
+      'buyer@agrione.com': 'Buyer@123',
+      '9876543211': 'Buyer@123',
+      'admin@agrione.com': 'Admin@123',
+      '9876543212': 'Admin@123',
+      'expert@agrione.com': 'Expert@123',
+      '9876543213': 'Expert@123',
+    };
+
+    const found = allUsers.find(
+      u => (u.email && u.email.toLowerCase() === query) || (u.mobileNumber && u.mobileNumber === query)
     );
 
     if (!found) {
-      if ((emailOrPhone || '').toLowerCase().includes('buyer')) {
-        found = DEFAULT_USERS[1];
-      } else if ((emailOrPhone || '').toLowerCase().includes('admin')) {
-        found = DEFAULT_USERS[2];
-      } else {
-        found = DEFAULT_USERS[0]; // fallback to Farmer
-      }
+      return makeResponse({
+        success: false,
+        message: 'Invalid credentials. User account does not exist.',
+      }, 401);
     }
 
+    // Verify password if demo user or registered user with password
+    const expectedPassword = demoPasswords[query] || demoPasswords[found.email?.toLowerCase()] || found.password;
+    if (expectedPassword && password !== expectedPassword) {
+      return makeResponse({
+        success: false,
+        message: 'Invalid email or password. Please check your credentials.',
+      }, 401);
+    }
+
+    const { password: _, passwordHash: __, ...safeUser } = found;
     const token = `agrione_jwt_token_${found.id}_${Date.now()}`;
     return makeResponse({
       success: true,
       message: 'Authentication successful',
       data: {
-        user: found,
+        user: safeUser,
         token,
       },
     });
@@ -301,44 +321,168 @@ export function handleMockFallback(config: AxiosRequestConfig): AxiosResponse<an
   if (url.startsWith('/auth/me') && method === 'get') {
     const saved = localStorage.getItem('agrione_user');
     const user = saved ? JSON.parse(saved) : DEFAULT_USERS[0];
+    const { password: _, passwordHash: __, ...safeUser } = user;
     return makeResponse({
       success: true,
-      data: { user },
+      data: { user: safeUser },
     });
   }
 
   // Register (/auth/register)
   if (url.startsWith('/auth/register') && method === 'post') {
+    const storedUsers = getStored<any[]>('users', []);
+    const allUsers = [...DEFAULT_USERS, ...storedUsers];
+
+    const email = (body.email || '').trim().toLowerCase();
+    const mobileNumber = (body.mobileNumber || '').trim();
+
+    // Check duplicate email or mobile
+    const existing = allUsers.find(
+      u => (u.email && u.email.toLowerCase() === email) || (u.mobileNumber && u.mobileNumber === mobileNumber)
+    );
+
+    if (existing) {
+      return makeResponse({
+        success: false,
+        message: 'An account with this email or mobile number already exists.',
+      }, 409);
+    }
+
     const newUser = {
       id: `user-gen-${Date.now()}`,
       fullName: body.fullName || 'Agricultural Producer',
-      mobileNumber: body.mobileNumber || '9876543299',
-      email: body.email || 'farmer@agrione.com',
+      mobileNumber: mobileNumber || '9876543299',
+      email: email || 'farmer@agrione.com',
+      password: body.password || '',
       state: body.state || 'Tamil Nadu',
       district: body.district || 'Thanjavur',
       village: body.village || 'Delta',
       role: body.role || 'FARMER',
+      avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(body.fullName || 'Farmer')}`,
       createdAt: new Date().toISOString(),
     };
-    const storedUsers = getStored<any[]>('users', []);
+
     storedUsers.push(newUser);
     setStored('users', storedUsers);
+
+    const { password: _, ...safeUser } = newUser;
 
     return makeResponse({
       success: true,
       message: 'Account registered successfully',
       data: {
-        user: newUser,
+        user: safeUser,
         token: `agrione_jwt_${newUser.id}_${Date.now()}`,
       },
+    }, 201);
+  }
+
+  // Update Profile (/auth/profile)
+  if (url.startsWith('/auth/profile') && method === 'put') {
+    const saved = localStorage.getItem('agrione_user');
+    const currentUser = saved ? JSON.parse(saved) : DEFAULT_USERS[0];
+
+    const updatedUser = {
+      ...currentUser,
+      ...(body.fullName && { fullName: body.fullName }),
+      ...(body.state && { state: body.state }),
+      ...(body.district && { district: body.district }),
+      ...(body.village && { village: body.village }),
+      ...(body.avatarUrl && { avatarUrl: body.avatarUrl }),
+      updatedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem('agrione_user', JSON.stringify(updatedUser));
+
+    // Also update in stored mock users if present
+    const storedUsers = getStored<any[]>('users', []);
+    const uIdx = storedUsers.findIndex(u => u.id === currentUser.id);
+    if (uIdx >= 0) {
+      storedUsers[uIdx] = { ...storedUsers[uIdx], ...updatedUser };
+      setStored('users', storedUsers);
+    }
+
+    return makeResponse({
+      success: true,
+      message: 'Profile updated successfully.',
+      data: { user: updatedUser },
+    });
+  }
+
+  // Change Password (/auth/change-password)
+  if (url.startsWith('/auth/change-password') && method === 'put') {
+    const { currentPassword, newPassword } = body;
+    if (!currentPassword || !newPassword) {
+      return makeResponse({
+        success: false,
+        message: 'Current password and new password are required.',
+      }, 400);
+    }
+
+    if (newPassword.length < 6) {
+      return makeResponse({
+        success: false,
+        message: 'New password must be at least 6 characters.',
+      }, 400);
+    }
+
+    const saved = localStorage.getItem('agrione_user');
+    const currentUser = saved ? JSON.parse(saved) : DEFAULT_USERS[0];
+
+    // Check stored user password or demo password
+    const demoPasswords: Record<string, string> = {
+      'farmer@agrione.com': 'Farmer@123',
+      'buyer@agrione.com': 'Buyer@123',
+      'admin@agrione.com': 'Admin@123',
+      'expert@agrione.com': 'Expert@123',
+    };
+
+    const storedUsers = getStored<any[]>('users', []);
+    const userInStorage = storedUsers.find(u => u.id === currentUser.id);
+    const expected = userInStorage?.password || demoPasswords[currentUser.email?.toLowerCase()] || 'Farmer@123';
+
+    if (currentPassword !== expected) {
+      return makeResponse({
+        success: false,
+        message: 'Current password does not match our records.',
+      }, 400);
+    }
+
+    if (userInStorage) {
+      userInStorage.password = newPassword;
+      setStored('users', storedUsers);
+    }
+
+    return makeResponse({
+      success: true,
+      message: 'Password changed successfully. Your account is now protected with the new password.',
     });
   }
 
   // Forgot password
   if (url.startsWith('/auth/forgot-password') && method === 'post') {
+    const resetToken = '123456';
     return makeResponse({
       success: true,
-      message: 'Password reset link sent to your mobile & email.',
+      message: 'Password reset code has been sent to your registered contact.',
+      data: {
+        demoResetToken: resetToken,
+      },
+    });
+  }
+
+  // Reset password
+  if (url.startsWith('/auth/reset-password') && method === 'post') {
+    const { newPassword } = body;
+    if (!newPassword || newPassword.length < 6) {
+      return makeResponse({
+        success: false,
+        message: 'Password must be at least 6 characters.',
+      }, 400);
+    }
+    return makeResponse({
+      success: true,
+      message: 'Password has been reset successfully. Please log in with your new password.',
     });
   }
 

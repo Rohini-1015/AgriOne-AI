@@ -26,6 +26,7 @@ import { FarmProfilePage } from './pages/FarmProfilePage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { WeatherPage } from './pages/WeatherPage';
 import { AllFeaturesPage } from './pages/AllFeaturesPage';
+import { MyAccountPage } from './pages/MyAccountPage';
 
 // Protected Route Guard
 const ProtectedRoute: React.FC<{
@@ -131,6 +132,15 @@ export const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/my-account"
+          element={
+            <ProtectedRoute>
+              <MyAccountPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/account" element={<Navigate to="/my-account" replace />} />
         <Route
           path="/farm-profile"
           element={

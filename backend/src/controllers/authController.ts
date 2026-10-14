@@ -259,4 +259,46 @@ export class AuthController {
       next(error);
     }
   }
+
+  public static async changePassword(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.user) {
+        res.status(401).json({ success: false, message: 'Authentication required.' });
+        return;
+      }
+
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) {
+        res.status(400).json({ success: false, message: 'Both current password and new password are required.' });
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        res.status(400).json({ success: false, message: 'New password must be at least 6 characters long.' });
+        return;
+      }
+
+      const user = dataStore.users.find(u => u.id === req.user?.id);
+      if (!user) {
+        res.status(404).json({ success: false, message: 'User account not found.' });
+        return;
+      }
+
+      const isCurrentValid = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!isCurrentValid) {
+        res.status(400).json({ success: false, message: 'Incorrect current password. Please try again.' });
+        return;
+      }
+
+      user.passwordHash = await bcrypt.hash(newPassword, 10);
+      user.updatedAt = new Date();
+
+      res.status(200).json({
+        success: true,
+        message: 'Password changed successfully. Your account is now secured with the new password.',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

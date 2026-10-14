@@ -97,7 +97,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       setExpandedCategories(prev => ({ ...prev, services: true }));
     } else if (path.startsWith('/agribot')) {
       setExpandedCategories(prev => ({ ...prev, ai: true }));
-    } else if (['/farm-profile', '/admin'].some(p => path.startsWith(p))) {
+    } else if (['/farm-profile', '/admin', '/my-account', '/account'].some(p => path.startsWith(p))) {
       setExpandedCategories(prev => ({ ...prev, account: true }));
     }
   }, [location.pathname]);
@@ -169,6 +169,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         label: language === 'ta' ? 'சுயவிவரம் & நிர்வாகம்' : 'Account & Admin',
         icon: User,
         items: [
+          { to: '/my-account', label: language === 'ta' ? 'எனது கணக்கு மையம்' : 'My Account Hub', icon: User, badge: 'Hub' },
           { to: '/farm-profile', label: t('navFarmProfile'), icon: Sprout },
           ...(user?.role === 'ADMIN'
             ? [{ to: '/admin', label: t('navAdmin'), icon: ShieldCheck, badge: 'Admin' }]
@@ -362,6 +363,12 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                     </span>
                   </div>
                   <div className="py-1">
+                    <Link
+                      to="/my-account"
+                      className="block px-3.5 py-1.5 text-xs text-emerald-800 hover:bg-emerald-50 font-bold"
+                    >
+                      {language === 'ta' ? '👤 எனது கணக்கு மையம்' : '👤 My Account Hub'}
+                    </Link>
                     <Link
                       to="/farm-profile"
                       className="block px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 font-medium"

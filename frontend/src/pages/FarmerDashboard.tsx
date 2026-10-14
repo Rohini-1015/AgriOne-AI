@@ -123,22 +123,27 @@ export const FarmerDashboard: React.FC = () => {
             </p>
           </div>
 
-          {/* Actions: 1 Primary CTA + 1 Secondary Link */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+          {/* Actions: Primary CTA + Account + Secondary Link */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+            <Link
+              to="/my-account"
+              className="px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 flex items-center justify-center space-x-1.5 transition-all shadow-2xs"
+            >
+              <span>{language === 'ta' ? '👤 கணக்கு மையம்' : '👤 My Account'}</span>
+            </Link>
             <Link
               to="/disease-doctor"
-              className="px-5 py-3 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center justify-center space-x-2 transition-all active:scale-[0.98]"
+              className="px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm flex items-center justify-center space-x-2 transition-all active:scale-[0.98]"
             >
               <Stethoscope className="w-4 h-4" />
               <span>{language === 'ta' ? 'இலை ஆய்வு செய்க' : 'Scan Crop Leaf'}</span>
             </Link>
             <Link
               to="/features"
-              className="px-4 py-3 rounded-xl font-bold text-xs bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center space-x-1.5 transition-all shadow-2xs"
+              className="px-3.5 py-2.5 rounded-xl font-bold text-xs bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center space-x-1 transition-all shadow-2xs"
             >
-              <LayoutGrid className="w-4 h-4 text-emerald-600" />
-              <span>{language === 'ta' ? 'அனைத்து வசதிகள்' : 'All Features'}</span>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+              <LayoutGrid className="w-3.5 h-3.5 text-emerald-700" />
+              <span>{language === 'ta' ? 'அனைத்து' : 'Features'}</span>
             </Link>
           </div>
         </div>
