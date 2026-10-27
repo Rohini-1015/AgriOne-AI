@@ -35,11 +35,14 @@ router.use('/farms', farmRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/admin', adminRoutes);
 
+import { isDatabaseActive } from '../config/db';
+
 // Health check endpoint
 router.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'AgriOne AI Core API Engine is operational.',
+    database: isDatabaseActive() ? 'Connected (SQLite dev.db)' : 'Disconnected',
     version: '1.0.0',
     timestamp: new Date(),
   });

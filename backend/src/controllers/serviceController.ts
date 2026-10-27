@@ -16,6 +16,38 @@ export class ServiceController {
     }
   }
 
+  public static async createEquipment(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { name, nameTa, type, hourlyRate, dailyRate, imageUrl, description } = req.body;
+      if (!name || !type || !hourlyRate || !dailyRate) {
+        res.status(400).json({ success: false, message: 'Missing required equipment fields.' });
+        return;
+      }
+      const newEq = {
+        id: `eq-${uuidv4().slice(0, 8)}`,
+        name,
+        nameTa: nameTa || name,
+        type,
+        hourlyRate: parseFloat(hourlyRate),
+        dailyRate: parseFloat(dailyRate),
+        imageUrl: imageUrl || 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600&auto=format&fit=crop&q=80',
+        description: description || '',
+        isAvailable: true,
+        createdAt: new Date(),
+      };
+      dataStore.equipments.unshift(newEq);
+      await dataStore.persistEquipment(newEq);
+
+      res.status(201).json({
+        success: true,
+        message: 'Equipment added successfully.',
+        data: { equipment: newEq },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public static async getEquipmentRequests(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.user) {
@@ -71,9 +103,10 @@ export class ServiceController {
       };
 
       dataStore.equipmentRequests.unshift(newRequest);
+      await dataStore.persistEquipmentRequest(newRequest);
 
       // Notification
-      dataStore.notifications.unshift({
+      await dataStore.addNotification({
         id: `notif-${uuidv4().slice(0, 8)}`,
         userId: req.user.id,
         titleEn: `Equipment Booking Submitted: ${equipmentType}`,
@@ -108,6 +141,7 @@ export class ServiceController {
       }
 
       request.status = status;
+      await dataStore.persistEquipmentRequest(request);
 
       res.status(200).json({
         success: true,
@@ -172,8 +206,9 @@ export class ServiceController {
       };
 
       dataStore.labourRequests.unshift(newRequest);
+      await dataStore.persistLabourRequest(newRequest);
 
-      dataStore.notifications.unshift({
+      await dataStore.addNotification({
         id: `notif-${uuidv4().slice(0, 8)}`,
         userId: req.user.id,
         titleEn: `Labour Booking Broadcasted: ${workType}`,
@@ -209,6 +244,7 @@ export class ServiceController {
 
       request.status = status;
       request.updatedAt = new Date();
+      await dataStore.persistLabourRequest(request);
 
       res.status(200).json({
         success: true,
@@ -277,8 +313,9 @@ export class ServiceController {
       };
 
       dataStore.logisticsRequests.unshift(newRequest);
+      await dataStore.persistLogisticsRequest(newRequest);
 
-      dataStore.notifications.unshift({
+      await dataStore.addNotification({
         id: `notif-${uuidv4().slice(0, 8)}`,
         userId: req.user.id,
         titleEn: `Logistics Transport Booked: ${cropName}`,
@@ -314,6 +351,7 @@ export class ServiceController {
 
       request.status = status;
       request.updatedAt = new Date();
+      await dataStore.persistLogisticsRequest(request);
 
       res.status(200).json({
         success: true,

@@ -37,6 +37,8 @@ export class ChatController {
         createdAt: new Date(),
       };
       session.messages.push(userMsg);
+      await dataStore.persistChatSession(session);
+      await dataStore.persistChatMessage(session.id, userMsg);
 
       // Run AI Chatbot Agronomy Service
       const reply = await AiChatService.answerFarmingQuestion(message, language);
@@ -51,6 +53,7 @@ export class ChatController {
         createdAt: new Date(),
       };
       session.messages.push(botMsg);
+      await dataStore.persistChatMessage(session.id, botMsg);
 
       res.status(200).json({
         success: true,

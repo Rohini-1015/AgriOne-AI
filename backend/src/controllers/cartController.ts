@@ -82,6 +82,8 @@ export class CartController {
         });
       }
 
+      await dataStore.persistCart(cart);
+
       res.status(200).json({
         success: true,
         message: 'Item added to cart.',
@@ -115,6 +117,8 @@ export class CartController {
         item.quantity = parseFloat(quantity);
       }
 
+      await dataStore.persistCart(cart);
+
       res.status(200).json({
         success: true,
         message: 'Cart updated.',
@@ -134,6 +138,7 @@ export class CartController {
       const { id } = req.params;
       const cart = CartController.getOrCreateCart(req.user.id);
       cart.items = cart.items.filter(i => i.id !== id);
+      await dataStore.persistCart(cart);
 
       res.status(200).json({
         success: true,
@@ -153,6 +158,7 @@ export class CartController {
 
       const cart = CartController.getOrCreateCart(req.user.id);
       cart.items = [];
+      await dataStore.persistCart(cart);
 
       res.status(200).json({
         success: true,

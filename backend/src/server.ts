@@ -4,7 +4,8 @@ import path from 'path';
 import { env } from './config/env';
 import apiRouter from './routes';
 import { errorHandler } from './middleware/errorMiddleware';
-import { checkDatabaseConnection } from './config/db';
+import { checkDatabaseConnection, isDatabaseActive } from './config/db';
+import { dataStore } from './services/dataStore';
 
 const app = express();
 
@@ -13,15 +14,6 @@ app.use(cors({
   origin: '*',
   credentials: true,
 }));
-
-// Security Headers Middleware
-app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(self), geolocation=(self), microphone=(), payment=(self), usb=()');
-  next();
-});
 
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
@@ -48,16 +40,19 @@ app.get('/', (req, res) => {
   res.json({
     app: 'AgriOne AI Platform API',
     status: 'Running',
+    database: isDatabaseActive() ? 'Connected (SQLite dev.db)' : 'Disconnected',
     documentation: '/api/health',
     timestamp: new Date(),
   });
 });
 
-// Start Server
 const server = app.listen(env.PORT, async () => {
   console.log(`🌾 AgriOne AI Backend Server running on port ${env.PORT}`);
   console.log(`🔗 API Base URL: ${env.API_URL}/api`);
-  await checkDatabaseConnection();
+  const isConnected = await checkDatabaseConnection();
+  if (isConnected) {
+    await dataStore.loadFromDb();
+  }
 });
 
 export default app;

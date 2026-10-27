@@ -6,12 +6,13 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 12000,
 });
 
 // Request interceptor to attach JWT token
 api.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('agrione_token');
+    const token = localStorage.getItem('agrione_token') || localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -20,7 +21,7 @@ api.interceptors.request.use(
   error => Promise.reject(error)
 );
 
-// Response interceptor to handle session expiration and seamless fallback
+// Response interceptor to handle session expiration and seamless Vercel fallback
 api.interceptors.response.use(
   response => {
     // If Vercel rewrote an API call to index.html, it returns 200 with HTML string
@@ -52,3 +53,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+

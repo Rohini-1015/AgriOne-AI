@@ -9,6 +9,7 @@ router.use(authenticateJwt);
 
 // Equipment
 router.get('/equipment', ServiceController.getEquipments);
+router.post('/equipment', ServiceController.createEquipment);
 router.get('/equipment/requests', ServiceController.getEquipmentRequests);
 router.post('/equipment/requests', ServiceController.createEquipmentRequest);
 router.put('/equipment/requests/:id/status', authorizeRoles('ADMIN', 'FARMER'), ServiceController.updateEquipmentStatus);

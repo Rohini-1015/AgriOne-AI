@@ -41,6 +41,7 @@ export class SoilController {
       };
 
       dataStore.soilReports.unshift(reportRecord);
+      await dataStore.persistSoilReport(reportRecord);
 
       res.status(200).json({
         success: true,

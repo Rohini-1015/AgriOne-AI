@@ -53,6 +53,7 @@ export class FarmController {
       };
 
       dataStore.farms.push(newFarm);
+      await dataStore.persistFarm(newFarm);
 
       res.status(201).json({
         success: true,
@@ -80,6 +81,7 @@ export class FarmController {
       }
 
       Object.assign(farm, req.body, { updatedAt: new Date() });
+      await dataStore.persistFarm(farm);
 
       res.status(200).json({
         success: true,
@@ -107,6 +109,7 @@ export class FarmController {
       }
 
       dataStore.farms.splice(index, 1);
+      await dataStore.deleteFarm(String(id));
 
       res.status(200).json({
         success: true,

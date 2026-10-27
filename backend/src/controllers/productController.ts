@@ -125,6 +125,7 @@ export class ProductController {
       };
 
       dataStore.products.unshift(newProduct);
+      dataStore.persistProduct(newProduct);
 
       res.status(201).json({
         success: true,
@@ -173,6 +174,7 @@ export class ProductController {
       });
 
       product.updatedAt = new Date();
+      await dataStore.persistProduct(product);
 
       res.status(200).json({
         success: true,
@@ -210,6 +212,7 @@ export class ProductController {
       }
 
       dataStore.products.splice(index, 1);
+      await dataStore.deleteProduct(String(id));
 
       res.status(200).json({
         success: true,

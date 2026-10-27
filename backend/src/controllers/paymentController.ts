@@ -23,6 +23,14 @@ export class PaymentController {
         customerName: customerName || order.buyerName,
       });
 
+      await dataStore.persistPayment({
+        orderId,
+        merchantTxnId: result.merchantTransactionId,
+        amount: amount || order.totalAmount,
+        status: 'PENDING',
+        paymentMode: 'PHONEPE_MOCK',
+      });
+
       res.status(200).json({
         success: true,
         data: result,
@@ -43,6 +51,17 @@ export class PaymentController {
           order.orderStatus = 'CONFIRMED';
         }
         order.updatedAt = new Date();
+        await dataStore.persistOrder(order);
+      }
+
+      if (merchantTransactionId) {
+        await dataStore.persistPayment({
+          orderId,
+          merchantTxnId: merchantTransactionId,
+          amount: order ? order.totalAmount : 0,
+          status: paymentStatus === 'COMPLETED' ? 'COMPLETED' : 'FAILED',
+          providerTxnId: merchantTransactionId,
+        });
       }
 
       res.status(200).json({

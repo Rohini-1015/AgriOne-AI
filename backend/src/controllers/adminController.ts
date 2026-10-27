@@ -124,6 +124,7 @@ export class AdminController {
 
       user.role = role as any;
       user.updatedAt = new Date();
+      await dataStore.persistUser(user);
 
       res.status(200).json({
         success: true,

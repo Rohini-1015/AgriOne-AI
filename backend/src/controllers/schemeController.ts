@@ -99,6 +99,7 @@ export class SchemeController {
       };
 
       dataStore.schemes.unshift(newScheme);
+      await dataStore.persistScheme(newScheme);
 
       res.status(201).json({
         success: true,
@@ -121,6 +122,7 @@ export class SchemeController {
       }
 
       Object.assign(scheme, req.body, { updatedAt: new Date() });
+      await dataStore.persistScheme(scheme);
 
       res.status(200).json({
         success: true,
@@ -143,6 +145,7 @@ export class SchemeController {
       }
 
       dataStore.schemes.splice(index, 1);
+      await dataStore.deleteScheme(String(id));
 
       res.status(200).json({
         success: true,

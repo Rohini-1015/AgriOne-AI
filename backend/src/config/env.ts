@@ -6,7 +6,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 export const env = {
   PORT: process.env.PORT ? parseInt(process.env.PORT, 10) : 5000,
   NODE_ENV: process.env.NODE_ENV || 'development',
-  DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/agrione?schema=public',
+  DATABASE_URL: process.env.DATABASE_URL || 'file:./dev.db',
   JWT_SECRET: process.env.JWT_SECRET || 'agrione_super_secret_jwt_key_development_2026_safe_seed',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
   API_URL: process.env.API_URL || 'http://localhost:5000',

@@ -32,3 +32,10 @@ yarn-error.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# Database files
+*.db
+*.db-journal
+backend/prisma/*.db
+backend/prisma/*.db-journal
+

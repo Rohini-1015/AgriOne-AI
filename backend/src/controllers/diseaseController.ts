@@ -48,10 +48,11 @@ export class DiseaseController {
       };
 
       dataStore.diseaseScans.unshift(scanRecord);
+      await dataStore.persistDiseaseScan(scanRecord);
 
       // Also trigger a notification if user is logged in
       if (req.user?.id) {
-        dataStore.notifications.unshift({
+        await dataStore.addNotification({
           id: `notif-${uuidv4().slice(0, 8)}`,
           userId: req.user.id,
           titleEn: `Crop Doctor: ${result.cropName} Scan Completed`,

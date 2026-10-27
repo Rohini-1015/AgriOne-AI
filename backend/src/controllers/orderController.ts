@@ -80,6 +80,7 @@ export class OrderController {
       };
 
       dataStore.orders.unshift(newOrder);
+      await dataStore.persistOrder(newOrder);
 
       // Clear user's cart if any
       const userCart = dataStore.carts.find(c => c.userId === req.user?.id);
@@ -97,7 +98,7 @@ export class OrderController {
       });
 
       // Send buyer notification
-      dataStore.notifications.unshift({
+      await dataStore.addNotification({
         id: `notif-${uuidv4().slice(0, 8)}`,
         userId: req.user.id,
         titleEn: `Order Placed: ${orderNumber}`,
@@ -230,9 +231,10 @@ export class OrderController {
 
       order.orderStatus = status as any;
       order.updatedAt = new Date();
+      await dataStore.persistOrder(order);
 
       // Notify buyer of status update
-      dataStore.notifications.unshift({
+      await dataStore.addNotification({
         id: `notif-${uuidv4().slice(0, 8)}`,
         userId: order.buyerId,
         titleEn: `Order Status: ${order.orderNumber} is now ${status}`,

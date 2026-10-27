@@ -70,9 +70,10 @@ export class AuthController {
       };
 
       dataStore.users.push(newUser);
+      dataStore.persistUser(newUser);
 
       // Create welcome notification
-      dataStore.notifications.push({
+      await dataStore.addNotification({
         id: `notif-${uuidv4().slice(0, 8)}`,
         userId: newUser.id,
         titleEn: `Welcome to AgriOne AI, ${newUser.fullName}!`,
@@ -183,6 +184,7 @@ export class AuthController {
       if (village) user.village = village;
       if (avatarUrl) user.avatarUrl = avatarUrl;
       user.updatedAt = new Date();
+      await dataStore.persistUser(user);
 
       res.status(200).json({
         success: true,
@@ -212,6 +214,7 @@ export class AuthController {
       if (user) {
         (user as any).resetToken = resetToken;
         (user as any).resetExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+        await dataStore.persistUser(user);
       }
 
       res.status(200).json({
@@ -250,52 +253,11 @@ export class AuthController {
       (user as any).resetToken = null;
       (user as any).resetExpires = null;
       user.updatedAt = new Date();
+      await dataStore.persistUser(user);
 
       res.status(200).json({
         success: true,
         message: 'Password has been reset successfully. Please log in with your new password.',
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  public static async changePassword(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
-    try {
-      if (!req.user) {
-        res.status(401).json({ success: false, message: 'Authentication required.' });
-        return;
-      }
-
-      const { currentPassword, newPassword } = req.body;
-      if (!currentPassword || !newPassword) {
-        res.status(400).json({ success: false, message: 'Both current password and new password are required.' });
-        return;
-      }
-
-      if (newPassword.length < 6) {
-        res.status(400).json({ success: false, message: 'New password must be at least 6 characters long.' });
-        return;
-      }
-
-      const user = dataStore.users.find(u => u.id === req.user?.id);
-      if (!user) {
-        res.status(404).json({ success: false, message: 'User account not found.' });
-        return;
-      }
-
-      const isCurrentValid = await bcrypt.compare(currentPassword, user.passwordHash);
-      if (!isCurrentValid) {
-        res.status(400).json({ success: false, message: 'Incorrect current password. Please try again.' });
-        return;
-      }
-
-      user.passwordHash = await bcrypt.hash(newPassword, 10);
-      user.updatedAt = new Date();
-
-      res.status(200).json({
-        success: true,
-        message: 'Password changed successfully. Your account is now secured with the new password.',
       });
     } catch (error) {
       next(error);

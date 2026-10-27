@@ -10,7 +10,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
-    "seed": "ts-node src/utils/seed.ts"
+    "seed": "ts-node src/utils/seed.ts",
+    "db:view": "ts-node src/utils/viewDb.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.21.1",

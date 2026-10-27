@@ -49,6 +49,7 @@ export class CropController {
       };
 
       dataStore.cropRecommendations.unshift(record);
+      await dataStore.persistCropRecommendation(record);
 
       res.status(200).json({
         success: true,

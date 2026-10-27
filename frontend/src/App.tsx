@@ -50,7 +50,7 @@ const ProtectedRoute: React.FC<{
   return <>{children}</>;
 };
 
-// UI Safety Error Boundary
+// UI Safety Error Boundary for robust client-side rendering
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error: any }
@@ -133,15 +133,6 @@ export const App: React.FC = () => {
           }
         />
         <Route
-          path="/my-account"
-          element={
-            <ProtectedRoute>
-              <MyAccountPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/account" element={<Navigate to="/my-account" replace />} />
-        <Route
           path="/farm-profile"
           element={
             <ProtectedRoute>
@@ -192,6 +183,17 @@ export const App: React.FC = () => {
           }
         />
 
+        {/* My Account */}
+        <Route
+          path="/my-account"
+          element={
+            <ProtectedRoute>
+              <MyAccountPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/account" element={<Navigate to="/my-account" replace />} />
+
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -201,3 +203,4 @@ export const App: React.FC = () => {
 };
 
 export default App;
+

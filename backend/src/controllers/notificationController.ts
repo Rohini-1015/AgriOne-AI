@@ -36,6 +36,7 @@ export class NotificationController {
 
       if (notif) {
         notif.isRead = true;
+        await dataStore.persistNotification(notif);
       }
 
       res.status(200).json({
@@ -54,11 +55,12 @@ export class NotificationController {
         return;
       }
 
-      dataStore.notifications.forEach(n => {
+      for (const n of dataStore.notifications) {
         if (n.userId === req.user?.id || n.userId === 'user-farmer-01') {
           n.isRead = true;
+          await dataStore.persistNotification(n);
         }
-      });
+      }
 
       res.status(200).json({
         success: true,
